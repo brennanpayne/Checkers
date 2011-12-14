@@ -1,0 +1,155 @@
+<?xml version="1.0"?>
+<project name="Checkers" default="build">
+    <property file="build.properties" />
+    <property name="app.name"            value="${ant.project.name}" />
+
+    <property name="build.dir"           value="build" />
+    <property name="src.dir"             value="src" />
+    <property name="classes.dir"         value="${build.dir}/classes" />
+    <property name="dist.dir"            value="dist" />
+    <property name="lib.dir"             value="lib" />
+    <property name="doc.dir"             value="doc" />
+    <property name="javadoc.dir"         value="${doc.dir}/api" />
+    <property name="jar.file"            value="${app.name}.jar" />
+    <property name="hwdist-tmp.dir"      value="build/hwdist-tmp" />
+    <property name="hweclipse-tmp.dir"   value="build/hweclipse-tmp" />
+    <property name="classpath"           value="${classes.dir}:${lib.dir}" />
+
+    <target name="all" depends="clean,compile,build" />
+
+    <target name="-init">
+    </target>
+
+    <!-- clean: removes all class files -->
+    <target name="clean">
+        <delete dir="${build.dir}" />
+        <delete file="${jar.file}" />
+    </target>
+
+    <!-- clobber: removes all derived files -->
+    <target name="clobber" depends="clean">
+        <delete dir="${dist.dir}" />
+        <delete dir="${javadoc.dir}" />
+    </target>
+
+    <!-- compile: compiles ${src.dir} into ${build.dir} -->
+    <target name="compile">
+        <mkdir dir="${classes.dir}" />
+        <javac 
+            srcdir="${src.dir}" 
+            destdir="${classes.dir}"
+
+            classpath="${classpath}"
+            debug="${compile.debug}"
+        >
+        </javac>
+    </target>
+
+    <!-- javadoc: generates javadoc from ${src.dir} into ${doc.dir} -->
+    <target name="javadoc">
+        <javadoc
+            destdir="${javadoc.dir}"
+            author="false"
+            use="true"
+            version="true"
+            sourcepath="${src.dir}"
+            packagenames="cs540.checkers"
+        >
+            <!-- this tag requires an internet connection to work properly! -->
+            <link href="http://java.sun.com/j2se/1.5.0/docs/api/" />
+        </javadoc>
+    </target>
+
+    <!-- srcdist: generates a 'TA edition' source tarball -->
+    <target name="srcdist">
+        <mkdir dir="${dist.dir}" />
+        <tar destfile="${dist.dir}/${app.name}-src.tar.gz" compression="gzip">
+            <tarfileset dir="${basedir}" prefix="${app.name}">
+                <exclude name="${dist.dir}/" />
+                <exclude name="${build.dir}/" />
+                <exclude name=".git/" />
+                <exclude name="${jar.file}" />
+
+                <exclude name="ab-cases" />
+                <exclude name="ab-data" />
+                <exclude name="ab-report" />
+
+                <exclude name="tourney.db" />
+                <exclude name="tourney-log" />
+            </tarfileset>
+        </tar>
+    </target>
+
+    <!-- hwdist: generates a 'student edition' source tarball -->
+    <target name="hwdist" depends="jar">
+        <mkdir dir="${dist.dir}" />
+
+        <!-- jar the F08 dhe player -->
+        <jar destfile="${build.dir}/dhe-player.jar" basedir="${classes.dir}">
+            <include name="cs540/checkers/dhe/**/*.class" />
+        </jar>
+
+        <!-- copy all included files to temporary directory ${hwdist-tmp.dir} -->
+        <mkdir dir="${hwdist-tmp.dir}" />
+        <copy todir="${hwdist-tmp.dir}" >
+            <fileset dir="${basedir}">
+                <include name="${src.dir}/cs540/checkers/*.java" />
+                <include name="${src.dir}/cs540/checkers/demo/" />
+                <include name="${src.dir}/cs540/checkers/ui/" />
+                <include name="${src.dir}/cs540/checkers/cli/" />
+                <include name="build.xml" />
+                <include name="build.properties" />
+            </fileset>
+        </copy>
+
+        <!-- copy F08 dhe player to lib/ -->
+        <mkdir dir="${hwdist-tmp.dir}/lib" />
+        <copy file="${build.dir}/dhe-player.jar" todir="${hwdist-tmp.dir}/lib" />
+
+        <!-- tar and gzip -->
+        <tar destfile="${dist.dir}/${app.name}-hw.tar.gz" compression="gzip">
+            <tarfileset dir="${hwdist-tmp.dir}" prefix="${app.name}" />
+        </tar>
+    </target>
+
+    <!-- build-grader: -->
+    <target name="build-grader" depends="compile">
+        <jar destfile="${build.dir}/${app.name}-grader.jar">
+            <fileset dir="${classes.dir}" includes="**/*.class" />
+            <manifest>
+                <attribute name="Main-Class" value="cs540.checkers.ta.Grader" />
+            </manifest>
+        </jar>
+        <jar destfile="${build.dir}/${app.name}-casegen.jar">
+            <fileset dir="${classes.dir}" includes="**/*.class" />
+            <manifest>
+                <attribute name="Main-Class" value="cs540.checkers.ta.CaseGen" />
+            </manifest>
+        </jar>
+    </target>
+
+    <!-- jar: combine the class files using jar -->
+    <target name="jar" depends="compile">
+        <jar destfile="${build.dir}/${jar.file}">
+            <fileset dir="${classes.dir}" includes="**/*.class" />
+            <fileset dir="${lib.dir}" includes="**/*.class" />
+            <fileset dir="${src.dir}" includes="cs540/checkers/ui/images/*.png" />
+            <manifest>
+                <attribute name="Main-Class" value="cs540.checkers.Checkers" />
+                <!-- include F08 dhe player in classpath (only useful for hwdist) -->
+                <attribute name="Class-Path" value="lib/dhe-player.jar" />
+            </manifest>
+        </jar>
+    </target>
+
+    <!-- dist: create runtime distributable -->
+    <target name="dist" depends="jar">
+        <copy todir="${dist.dir}" file="${build.dir}/${jar.file}" />
+    </target>
+
+    <!-- build: compile, jar, then move jar to basedir -->
+    <target name="build" depends="jar" >
+        <copy todir="${basedir}" file="${build.dir}/${jar.file}" />
+    </target>
+</project>
+
