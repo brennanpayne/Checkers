@@ -1,7 +1,8 @@
 Checkers Program
 
 The gui was written by professors and UW-Madison
-The Alpha-Beta Player, the BetterEvaluator (which is used in the Bpayne Player), and the Bpayne Player were all written by Brennan Payne
+The Alpha-Beta Player, the BetterEvaluator (which is used in the Bpayne Player), and the Bpayne Player were all written by Brennan Payne.
+The Bpayne player recieved second place in the class competition against other computer opponents. 
 
 To run:
 
