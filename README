@@ -2,3 +2,13 @@ Checkers Program
 
 The gui was written by professors and UW-Madison
 The Alpha-Beta Player, the BetterEvaluator (which is used in the Bpayne Player), and the Bpayne Player were all written by Brennan Payne
+
+To run:
+
+-Navigate to the program in the command prompt
+-Type "java -jar Checkers.jar " followed which players you want playing in the order: red_player , black_player. 
+    Options for players are:
+      - ui.Human (A Human Player)
+      - bpayne.AlphaBeta (A player using a basic AlphaBeta algorithm)
+      - bpayne.Bpayne (A player using an optimized AlphaBeta algorithm in tandem with a better board evaluator)
+-Enjoy!
